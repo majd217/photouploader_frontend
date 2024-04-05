@@ -1,86 +1,47 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 
 class UploadYourPhotos extends StatefulWidget {
+  const UploadYourPhotos({super.key});
+
   @override
   State<UploadYourPhotos> createState() => UploadYourPhotosState();
 }
 
 class UploadYourPhotosState extends State<UploadYourPhotos> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
-  final _defaultFileNameController = TextEditingController();
-  final _dialogTitleController = TextEditingController();
-  final _initialDirectoryController = TextEditingController();
-  final _fileExtensionController = TextEditingController();
-  String? _fileName;
-  String? _saveAsFileName;
-  List<PlatformFile>? _paths;
-  String? _directoryPath;
-  String? _extension;
-  bool _isLoading = false;
-  bool _lockParentWindow = false;
-  bool _userAborted = false;
-
-  void _logException(String message) {
-    print(message);
-    _scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
-    _scaffoldMessengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
+  void pickFiles() async {
+    var pickedFiles = await FilePicker.platform.pickFiles(
+        allowMultiple: true, type: FileType.media, withReadStream: true);
+    uploadPhotosRequest(pickedFiles!.files);
   }
 
-  void _resetState() {
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      _isLoading = true;
-      _directoryPath = null;
-      _fileName = null;
-      _paths = null;
-      _saveAsFileName = null;
-      _userAborted = false;
-    });
-  }
+  uploadPhotosRequest(List<PlatformFile> files) async {
+    var postUri = Uri.parse('http://192.168.68.50:8080/photo/upload');
+    var request = http.MultipartRequest('POST', postUri);
 
-  void _pickFiles() async {
-    _resetState();
-    try {
-      _directoryPath = null;
-      _paths = (await FilePicker.platform.pickFiles(
-        compressionQuality: 30,
-        type: FileType.media,
-        allowMultiple: true,
-        onFileLoading: (FilePickerStatus status) => print(status),
-        allowedExtensions: (_extension?.isNotEmpty ?? false)
-            ? _extension?.replaceAll(' ', '').split(',')
-            : null,
-        dialogTitle: _dialogTitleController.text,
-        initialDirectory: _initialDirectoryController.text,
-        lockParentWindow: _lockParentWindow,
-      ))
-          ?.files;
-    } on PlatformException catch (e) {
-      _logException('Unsupported operation' + e.toString());
-    } catch (e) {
-      _logException(e.toString());
+    for (var element in files) {
+      request.files.add(http.MultipartFile(
+          'images', element.readStream!.asBroadcastStream(), element.size,
+          filename: element.name));
     }
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-      _fileName =
-          _paths != null ? _paths!.map((e) => e.name).toString() : '...';
-      _userAborted = _paths == null;
+    print(request.contentLength);
+    request.send().then((response) {
+      switch (response.statusCode) {
+        case HttpStatus.ok:
+          {
+            print('Media uploaded successfully!');
+            break;
+          }
+        default:
+          {
+            print('Media was not uploaded!');
+            break;
+          }
+      }
     });
   }
 
@@ -91,43 +52,76 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
           width: double.infinity,
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  opacity: .8,
+                  opacity: .9,
                   image: AssetImage('assets/images/background.JPG'),
-                  fit: BoxFit.fill)),
+                  fit: BoxFit.cover)),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               const SizedBox(
                 height: 100,
               ),
               Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(15),
-                width: MediaQuery.of(context).size.width / 1.1,
-                height: MediaQuery.of(context).size.height / 8,
+                width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6),
+                    color: Colors.white.withOpacity(0.85),
                     borderRadius: const BorderRadius.all(Radius.circular(15))),
                 child: Center(
                   child: Text(
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontFamily: GoogleFonts.greatVibes().fontFamily,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: GoogleFonts.cookie().fontFamily,
                           fontSize: 20,
-                          color: const Color.fromARGB(255, 101, 100, 100)),
+                          color: Color.fromARGB(255, 101, 101, 101)),
                       'Thank you for joining our special day. We would love to see all the beautiful moments you have captured!'),
                 ),
               ),
-              const SizedBox(
-                height: 50,
+              // const SizedBox(
+              //   height: 50,
+              // ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 50),
+                padding: const EdgeInsets.all(60),
+                width: MediaQuery.of(context).size.width,
+                child: ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          Colors.white.withOpacity(.85),
+                        ),
+                        foregroundColor: MaterialStateProperty.all(
+                            Color.fromARGB(255, 101, 101, 101)),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        )),
+                    onPressed: () => pickFiles(),
+                    child: Container(
+                      child: Text(
+                        'upload',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 22,
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: GoogleFonts.cookie().fontFamily,
+                        ),
+                      ),
+                    )),
               ),
-              ElevatedButton(
-                  onPressed: () => _pickFiles(),
-                  child: Text(
-                    'upload',
-                    textAlign: TextAlign.center,
-                  ))
+              SizedBox(height: 150)
             ],
           )),
     );
   }
+
+  // void uploadPhotosRequest() {
+  //   Webservices.webServices.uploadPhotosRequest(pickedFiles);
+  //   print('step sent');
+  // }
 }
