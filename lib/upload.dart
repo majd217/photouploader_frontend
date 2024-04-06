@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:toastification/toastification.dart';
 
 class UploadYourPhotos extends StatefulWidget {
   const UploadYourPhotos({super.key});
@@ -13,6 +14,13 @@ class UploadYourPhotos extends StatefulWidget {
 }
 
 class UploadYourPhotosState extends State<UploadYourPhotos> {
+  bool isUploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   void pickFiles() async {
     var pickedFiles = await FilePicker.platform.pickFiles(
         allowMultiple: true, type: FileType.media, withReadStream: true);
@@ -20,28 +28,62 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
   }
 
   uploadPhotosRequest(List<PlatformFile> files) async {
-    var postUri = Uri.parse('http://192.168.68.50:8080/photo/upload');
-    var request = http.MultipartRequest('POST', postUri);
+    var postUri = Uri.parse('http://localhost:8080/photo/upload');
+    var request = http.MultipartRequest(
+      'POST',
+      postUri,
+    );
 
     for (var element in files) {
       request.files.add(http.MultipartFile(
           'images', element.readStream!.asBroadcastStream(), element.size,
           filename: element.name));
     }
-    print(request.contentLength);
-    request.send().then((response) {
+    setState(() {
+      isUploading = true;
+    });
+    late ToastificationType toastificationType;
+    late String toastText;
+    late Icon icon;
+    try {
+      http.StreamedResponse response = await request.send();
       switch (response.statusCode) {
         case HttpStatus.ok:
           {
             print('Media uploaded successfully!');
+            toastText = 'Media uploaded successfully!';
+            toastificationType = ToastificationType.success;
+            icon = const Icon(Icons.check);
+
             break;
           }
         default:
           {
             print('Media was not uploaded!');
+            toastText = 'Media was not uploaded!';
+            toastificationType = ToastificationType.error;
+            icon = const Icon(Icons.error);
             break;
           }
       }
+    } catch (e) {
+      print('Internal error occurred!');
+      toastText = 'Internal error occurred!';
+      toastificationType = ToastificationType.error;
+      icon = const Icon(Icons.error);
+    }
+
+    toastification.show(
+      closeButtonShowType: CloseButtonShowType.none,
+      showProgressBar: false,
+      autoCloseDuration: const Duration(seconds: 2),
+      icon: icon,
+      title: Text(toastText),
+      type: toastificationType,
+      context: context,
+    );
+    setState(() {
+      isUploading = false;
     });
   }
 
@@ -80,48 +122,53 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                       'Thank you for joining our special day. We would love to see all the beautiful moments you have captured!'),
                 ),
               ),
-              // const SizedBox(
-              //   height: 50,
-              // ),
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 50),
-                padding: const EdgeInsets.all(60),
+                padding: const EdgeInsets.all(100),
                 width: MediaQuery.of(context).size.width,
                 child: ElevatedButton(
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
-                          Colors.white.withOpacity(.85),
-                        ),
+                            Colors.white.withOpacity(0.85)),
                         foregroundColor: MaterialStateProperty.all(
-                            Color.fromARGB(255, 101, 101, 101)),
+                            Color.fromARGB(255, 181, 181, 181)
+                                .withOpacity(.85)),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         )),
-                    onPressed: () => pickFiles(),
-                    child: Container(
-                      child: Text(
-                        'upload',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 22,
-                          letterSpacing: 1,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: GoogleFonts.cookie().fontFamily,
-                        ),
-                      ),
-                    )),
+                    onPressed: () {
+                      pickFiles();
+                    },
+                    child: (isUploading == false)
+                        ? Container(
+                            margin: EdgeInsets.all(10),
+                            height: 50,
+                            child: Center(
+                              child: Text(
+                                'upload',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 101, 101, 101),
+                                  fontSize: 24,
+                                  letterSpacing: 1,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: GoogleFonts.cookie().fontFamily,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.all(10),
+                            height: 50,
+                            width: 50,
+                            child: CircularProgressIndicator(
+                                color: Color.fromARGB(255, 101, 101, 101)),
+                          )),
               ),
-              SizedBox(height: 150)
             ],
           )),
     );
   }
-
-  // void uploadPhotosRequest() {
-  //   Webservices.webServices.uploadPhotosRequest(pickedFiles);
-  //   print('step sent');
-  // }
 }
