@@ -109,7 +109,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                 height: 100,
               ),
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(15),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                           fontWeight: FontWeight.w500,
                           fontFamily: GoogleFonts.cookie().fontFamily,
                           fontSize: 20,
-                          color: Color.fromARGB(255, 101, 101, 101)),
+                          color: const Color.fromARGB(255, 101, 101, 101)),
                       'Thank you for joining our special day. We would love to see all the beautiful moments you have captured!'),
                 ),
               ),
@@ -135,7 +135,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                         backgroundColor: MaterialStateProperty.all(
                             Colors.white.withOpacity(0.85)),
                         foregroundColor: MaterialStateProperty.all(
-                            Color.fromARGB(255, 181, 181, 181)
+                            const Color.fromARGB(255, 181, 181, 181)
                                 .withOpacity(.85)),
                         shape:
                             MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -148,14 +148,15 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                     },
                     child: (isUploading == false)
                         ? Container(
-                            margin: EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(10),
                             height: 50,
                             child: Center(
                               child: Text(
                                 'upload',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Color.fromARGB(255, 101, 101, 101),
+                                  color:
+                                      const Color.fromARGB(255, 101, 101, 101),
                                   fontSize: 24,
                                   letterSpacing: 1,
                                   fontWeight: FontWeight.w500,
@@ -165,10 +166,10 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                             ),
                           )
                         : Container(
-                            margin: EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(10),
                             height: 50,
                             width: 50,
-                            child: CircularProgressIndicator(
+                            child: const CircularProgressIndicator(
                                 color: Color.fromARGB(255, 101, 101, 101)),
                           )),
               ),
