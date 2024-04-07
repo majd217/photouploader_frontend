@@ -16,15 +16,13 @@ class UploadYourPhotos extends StatefulWidget {
 class UploadYourPhotosState extends State<UploadYourPhotos> {
   bool isUploading = false;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   void pickFiles() async {
     var pickedFiles = await FilePicker.platform.pickFiles(
         allowMultiple: true, type: FileType.media, withReadStream: true);
-    uploadPhotosRequest(pickedFiles!.files);
+    if (pickedFiles == null) {
+      return;
+    }
+    uploadPhotosRequest(pickedFiles.files);
   }
 
   uploadPhotosRequest(List<PlatformFile> files) async {
@@ -35,6 +33,9 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
     );
 
     for (var element in files) {
+      if (element.readStream == null) {
+        continue;
+      }
       request.files.add(http.MultipartFile(
           'images', element.readStream!.asBroadcastStream(), element.size,
           filename: element.name));
@@ -54,7 +55,6 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
             toastText = 'Media uploaded successfully!';
             toastificationType = ToastificationType.success;
             icon = const Icon(Icons.check);
-
             break;
           }
         default:
@@ -73,15 +73,20 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
       icon = const Icon(Icons.error);
     }
 
-    toastification.show(
-      closeButtonShowType: CloseButtonShowType.none,
-      showProgressBar: false,
-      autoCloseDuration: const Duration(seconds: 2),
-      icon: icon,
-      title: Text(toastText),
-      type: toastificationType,
-      context: context,
-    );
+    if (mounted) {
+      //FIXME bug in the library when close duration is longer than animation duration
+      toastification.show(
+        closeButtonShowType: CloseButtonShowType.none,
+        showProgressBar: false,
+        autoCloseDuration: const Duration(seconds: 2),
+        icon: icon,
+        title: Text(toastText),
+        type: toastificationType,
+        alignment: Alignment.topCenter,
+        context: context,
+      );
+    }
+
     setState(() {
       isUploading = false;
     });
