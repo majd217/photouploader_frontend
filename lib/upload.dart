@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toastification/toastification.dart';
@@ -75,6 +75,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
 
     if (mounted) {
       //FIXME bug in the library when close duration is longer than animation duration
+      // https://github.com/payam-zahedi/toastification/issues/97
       toastification.show(
         closeButtonShowType: CloseButtonShowType.none,
         showProgressBar: false,
@@ -101,6 +102,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
               image: DecorationImage(
                   opacity: .9,
                   image: AssetImage('assets/images/background.JPG'),
+                  alignment: Alignment(-0.4, -0.7),
                   fit: BoxFit.cover)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -111,7 +113,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(15),
-                width: MediaQuery.of(context).size.width,
+                width: min(double.infinity, 450),
                 decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.85),
                     borderRadius: const BorderRadius.all(Radius.circular(15))),
@@ -128,8 +130,8 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.all(100),
-                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.all(15),
+                width: min(double.infinity, 200),
                 child: ElevatedButton(
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
