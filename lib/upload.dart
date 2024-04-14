@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_flavor/flutter_flavor.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:toastification/toastification.dart';
@@ -15,6 +16,7 @@ class UploadYourPhotos extends StatefulWidget {
 
 class UploadYourPhotosState extends State<UploadYourPhotos> {
   bool isUploading = false;
+  final String baseURL = FlavorConfig.instance.variables["baseUrl"];
 
   void pickFiles() async {
     var pickedFiles = await FilePicker.platform.pickFiles(
@@ -26,7 +28,7 @@ class UploadYourPhotosState extends State<UploadYourPhotos> {
   }
 
   uploadPhotosRequest(List<PlatformFile> files) async {
-    var postUri = Uri.parse('http://localhost:8080/photo/upload');
+    var postUri = Uri.parse('$baseURL/photo/upload');
     var request = http.MultipartRequest(
       'POST',
       postUri,

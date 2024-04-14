@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+      {
+        "name": "PROD-Flavor",
+        "program": "lib/main.dart",
+        "request": "launch",
+        "type": "dart"
+      },
+      {
+        "name": "DEV-Flavor",
+        "program": "lib/main_dev.dart",
+        "request": "launch",
+        "type": "dart"
+      }
+    ]
+  }
