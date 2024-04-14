@@ -3,9 +3,13 @@ import 'package:photouploader_frontend/upload.dart';
 import 'package:flutter_flavor/flutter_flavor.dart';
 
 void main() {
-  FlavorConfig(variables: {
-    "baseUrl": "https://photouploader.ddnsfree.com",
-  });
+  FlavorConfig(
+      name: "DEV",
+      color: Colors.red,
+      location: BannerLocation.bottomStart,
+      variables: {
+        "baseUrl": "http://localhost:8080",
+      });
   runApp(const MyApp());
 }
 
