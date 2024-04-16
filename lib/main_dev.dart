@@ -6,7 +6,7 @@ void main() {
   FlavorConfig(
       name: "DEV",
       color: Colors.red,
-      location: BannerLocation.bottomStart,
+      location: BannerLocation.topStart,
       variables: {
         "baseUrl": "http://localhost:8080",
       });
@@ -20,8 +20,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const FlavorBanner(
-      color: Colors.blue,
-      location: BannerLocation.topStart,
       child: MaterialApp(
         title: 'Upload Photos',
         home: UploadYourPhotos(),
